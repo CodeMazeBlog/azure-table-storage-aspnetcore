@@ -21,7 +21,7 @@ namespace GroceryStoreAPI.Controllers
         [ActionName(nameof(GetAsync))]
         public async Task<IActionResult> GetAsync([FromQuery] string category, string id)
         {
-            return Ok(await _storageService.RetrieveAsync(category, id));
+            return Ok(await _storageService.GetEntityAsync(category, id));
         }
 
         [HttpPost]
@@ -33,8 +33,7 @@ namespace GroceryStoreAPI.Controllers
             entity.Id = Id;
             entity.RowKey = Id;
 
-            var createdEntity = await _storageService.InsertOrMergeAsync(entity);
-
+            var createdEntity = await _storageService.UpsertEntityAsync(entity);
             return CreatedAtAction(nameof(GetAsync), createdEntity);
         }
 
@@ -44,15 +43,14 @@ namespace GroceryStoreAPI.Controllers
             entity.PartitionKey = entity.Category;
             entity.RowKey = entity.Id;
 
-            await _storageService.InsertOrMergeAsync(entity);
+            await _storageService.UpsertEntityAsync(entity);
             return NoContent();
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteAsync([FromQuery] string category, string id)
         {
-            var entity = await _storageService.RetrieveAsync(category, id);
-            await _storageService.DeleteAsync(entity);
+            await _storageService.DeleteEntityAsync(category, id);
             return NoContent();
         }
     }
